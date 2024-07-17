@@ -1,6 +1,6 @@
 # Parallel-Memo
 
-Parallel-Memo is a Node.js library for offloading heavy computations to worker threads, enabling parallel execution and improving application performance. It includes memoization by default, which can be turned off via the constructor.
+Parallel-Memo is a Node.js library for offloading heavy computations to worker threads, enabling parallel execution and improving application performance. It includes memoization by default, which can be turned off via the configuration.
 
 ## Installation
 
@@ -12,6 +12,8 @@ npm install parallel-memo
 
 ### Basic Usage
 
+#### Using Promises
+
 ```typescript
 import { Thread } from 'parallel-memo';
 
@@ -19,36 +21,71 @@ const someHeavyComputation = (a: number, b: number) => {
     return a + b;
 };
 
-const thread = new Thread();
-thread.exec(someHeavyComputation, 1, 2);
-
-thread.getResult().then(result => {
+Thread.exec(someHeavyComputation, 1, 2).then(result => {
     console.log('Computation result:', result);
 }).catch(error => {
     console.error('Error in thread execution:', error);
 });
 ```
 
-### Using Thread Pool
+#### Using Async/Await
 
 ```typescript
-import { ThreadPool } from 'parallel-memo';
-
-const pool = new ThreadPool({ size: 4 });
-const thread = pool.getThread();
+import { Thread } from 'parallel-memo';
 
 const someHeavyComputation = (a: number, b: number) => {
     return a + b;
 };
 
-thread.exec(someHeavyComputation, 1, 2);
+(async () => {
+    try {
+        const result = await Thread.exec(someHeavyComputation, 1, 2);
+        console.log('Computation result:', result);
+    } catch (error) {
+        console.error('Error in thread execution:', error);
+    }
+})();
+```
 
-thread.getResult().then(result => {
+### Using Thread Pool
+
+#### Using Promises
+
+```typescript
+import { ThreadPool } from 'parallel-memo';
+
+const pool = new ThreadPool({ size: 4 });
+
+const someHeavyComputation = (a: number, b: number) => {
+    return a + b;
+};
+
+pool.exec(someHeavyComputation, 1, 2).then(result => {
     console.log('Computation result:', result);
-    pool.releaseThread(thread);
 }).catch(error => {
     console.error('Error in thread execution:', error);
 });
+```
+
+#### Using Async/Await
+
+```typescript
+import { ThreadPool } from 'parallel-memo';
+
+const pool = new ThreadPool({ size: 4 });
+
+const someHeavyComputation = (a: number, b: number) => {
+    return a + b;
+};
+
+(async () => {
+    try {
+        const result = await pool.exec(someHeavyComputation, 1, 2);
+        console.log('Computation result:', result);
+    } catch (error) {
+        console.error('Error in thread execution:', error);
+    }
+})();
 ```
 
 ### Using with Caching
@@ -60,30 +97,30 @@ const someHeavyComputation = (a: number, b: number) => {
     return a + b;
 };
 
-const thread = new Thread({ enableCaching: true });
-thread.exec(someHeavyComputation, 1, 2);
+// Configure to disable caching if needed
+Thread.configure({ enableCaching: false });
 
-thread.getResult().then(result => {
-    console.log('Computation result:', result);
-}).catch(error => {
-    console.error('Error in thread execution:', error);
-});
+(async () => {
+    try {
+        const result = await Thread.exec(someHeavyComputation, 1, 2);
+        console.log('Computation result:', result);
+    } catch (error) {
+        console.error('Error in thread execution:', error);
+    }
+})();
 ```
 
 ## API
 
 ### `Thread`
 
-- `new Thread(options?: { enableCaching?: boolean })`: Creates a new thread instance with optional caching.
-- `exec(fn: (...args: any[]) => any, ...args: any[]): void`: Executes the provided function in the thread with the given arguments.
-- `getResult(): Promise<any>`: Returns a promise that resolves with the result of the executed function.
-- `terminate(): void`: Terminates the thread.
+- `static configure(options: { enableCaching?: boolean }): void`: Configures the caching behavior of the library.
+- `static exec(fn: (...args: any[]) => any, ...args: any[]): Promise<any>`: Executes the provided function in a worker thread with the given arguments and returns a promise that resolves with the result.
 
 ### `ThreadPool`
 
-- `new ThreadPool(options: { size: number, enableCaching?: boolean })`: Creates a new thread pool with the specified size and optional caching.
-- `getThread(): Thread`: Retrieves an available thread from the pool.
-- `releaseThread(thread: Thread): void`: Releases the specified thread back to the pool.
+- `constructor(options: { size: number, enableCaching?: boolean })`: Creates a new thread pool with the specified size and optional caching.
+- `exec(fn: (...args: any[]) => any, ...args: any[]): Promise<any>`: Executes the provided function in a worker thread from the pool with the given arguments and returns a promise that resolves with the result.
 
 ## Contributing
 

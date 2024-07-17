@@ -1,24 +1,30 @@
 import { Thread } from './Thread';
 
+interface ThreadPoolOptions {
+    size: number;
+    enableCaching?: boolean;
+}
+
 export class ThreadPool {
     private size: number;
     private threads: Thread[];
 
-    constructor({ size }: { size: number }) {
-        this.size = size;
-        this.threads = Array.from({ length: size }, () => new Thread());
+    constructor(options: ThreadPoolOptions) {
+        this.size = options.size;
+        this.threads = Array.from({ length: this.size }, () => new Thread());
+        Thread.configure({ enableCaching: options.enableCaching });
     }
 
-    getThread(): Thread {
-        const availableThread = this.threads.find(thread => !thread.inUse);
-        if (availableThread) {
-            availableThread.inUse = true;
-            return availableThread;
+    async exec(fn: (...args: any[]) => any, ...args: any[]): Promise<any> {
+        const availableThread = this.threads.pop();
+        if (!availableThread) {
+            throw new Error('No available threads in the pool');
         }
-        throw new Error('No available threads in the pool');
-    }
 
-    releaseThread(thread: Thread): void {
-        thread.inUse = false;
+        try {
+            return await Thread.exec(fn, ...args);
+        } finally {
+            this.threads.push(availableThread);
+        }
     }
 }
