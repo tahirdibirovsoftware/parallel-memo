@@ -1,0 +1,40 @@
+{
+  "name": "parallel-memo",
+  "version": "1.0.2",
+  "description": "A Node.js library for offloading heavy computations to worker threads with memoization",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  },
+  "keywords": [
+    "node",
+    "threads",
+    "worker",
+    "parallel",
+    "computation",
+    "memoization"
+  ],
+  "author": "Tahir Dibirov",
+  "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tahirdibirovsoftware/parallel-memo"
+  },
+  "bugs": {
+    "url": "https://github.com/tahirdibirovsoftware/parallel-memo/issues"
+  },
+  "homepage": "https://github.com/tahirdibirovsoftware/parallel-memo#readme"
+}
